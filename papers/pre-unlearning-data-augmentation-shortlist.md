@@ -8,6 +8,7 @@ Target focus: papers related to **geometry-aware unlearning** and/or **data augm
 - **Venue:** ACL 2025 (reported in scholarly indexes) / arXiv:2502.11190
 - **TL;DR (research gap):** Existing gradient-reversal style LLM unlearning often harms language quality and utility; this work identifies the need for a **data-centric augmentation pipeline** that boosts forgetting while preserving fluent generation.
 - **Link:** https://arxiv.org/abs/2502.11190
+- **Code:** https://github.com/zjunlp/unlearn
 
 ## 2) Align-then-Unlearn: Embedding Alignment for LLM Unlearning
 - **Authors (Affiliation):**  
@@ -15,6 +16,7 @@ Target focus: papers related to **geometry-aware unlearning** and/or **data augm
 - **Venue:** arXiv preprint (ICML format submission), 2025
 - **TL;DR (research gap):** Token-level unlearning fails under prompt rephrasing and tends to over-forget unrelated knowledge; this paper argues for a **pre-alignment stage in embedding space** to support more robust, concept-level forgetting.
 - **Link:** https://arxiv.org/abs/2506.13181
+- **Code:** https://github.com/ExplainableML/align-then-unlearn
 
 ## 3) Geometric-disentangelment Unlearning
 - **Authors (Affiliation):**  
@@ -29,6 +31,7 @@ Target focus: papers related to **geometry-aware unlearning** and/or **data augm
 - **Venue:** arXiv preprint, 2024
 - **TL;DR (research gap):** First-order unlearning updates are often too coarse for balancing forgetting and retention; this work highlights the need for **curvature-aware (second-order)** updates to improve one-shot optimization quality.
 - **Link:** https://arxiv.org/abs/2404.18239
+- **Code:** https://github.com/OPTML-Group/SOUL
 
 ## 5) Gauss-Newton Unlearning for the LLM Era
 - **Authors (Affiliation):**  
@@ -55,3 +58,139 @@ If your goal is a **pre-unlearning data augmentation framework for one-shot perf
 4. **Data Augmentation Improves Machine Unlearning** (strong evidence from non-LLM unlearning).
 
 These papers still leave open a clear gap: a unified framework that combines **(i) pre-unlearning augmentation** and **(ii) geometry-aware constrained updates** in a single one-shot pipeline for robust forgetting under paraphrase/relearning stress tests.
+
+---
+
+## 2024–2026 Expanded Coverage (Appended)
+
+Coverage rule used in this append: papers published/released in **2024–2026** only, with priority on benchmark/evaluation blind spots, proactive data handling, and one-shot stability.
+
+## 7) TOFU: A Task of Fictitious Unlearning for LLMs
+- **Authors (Affiliation):**  
+  Pratyush Maini; Zhili Feng; Avi Schwarzschild; Zachary C. Lipton; J. Zico Kolter (**Carnegie Mellon University**)
+- **Venue:** arXiv preprint, 2024
+- **TL;DR (research gap):** Establishes a foundational LLM unlearning benchmark and shows most methods fail to jointly satisfy forgetting + utility goals; motivates stronger pre-unlearning design.
+- **Link:** https://arxiv.org/abs/2401.06121
+- **Code:** https://github.com/locuslab/tofu
+
+## 8) The WMDP Benchmark: Measuring and Reducing Malicious Use With Unlearning
+- **Authors (Affiliation):**  
+  Nathaniel Li et al. (**multi-institution collaboration**, incl. Center for AI Safety, UC Berkeley, MIT, SecureBio, Scale AI, NYU, Stanford, Harvard, USC, UIUC, UCLA, CMU, Caltech, etc.)
+- **Venue:** ICML 2024 (PMLR 235) / arXiv:2403.03218
+- **TL;DR (research gap):** Introduces safety-centric unlearning benchmark and demonstrates that utility-preserving removal is hard in hazardous domains, reinforcing need for proactive robustness controls.
+- **Link:** https://arxiv.org/abs/2403.03218
+- **Code:** https://github.com/centerforaisafety/wmdp
+
+## 9) MUSE: Machine Unlearning Six-Way Evaluation for Language Models
+- **Authors (Affiliation):**  
+  Weijia Shi; Jaechan Lee; Daogao Liu; Luke Zettlemoyer; Noah A. Smith (**University of Washington**); Yangsibo Huang; Sadhika Malladi (**Princeton University**); Jieyu Zhao (**University of Southern California**); Ari Holtzman (**University of Chicago**); Chiyuan Zhang (**Google Research**)
+- **Venue:** arXiv preprint, 2024 (released as preprint under review)
+- **TL;DR (research gap):** Expands unlearning evaluation to six dimensions (forgetting, privacy, utility, scalability, sustainability), revealing blind spots missed by single-metric evaluations.
+- **Link:** https://arxiv.org/abs/2407.06460
+- **Code:** https://github.com/jaechan-repo/muse_bench
+
+## 10) BLUR: A Benchmark for LLM Unlearning Robust to Forget-Retain Overlap
+- **Authors (Affiliation):**  
+  Shengyuan Hu; Neil Kale; Pratiksha Thaker; Yiwei Fu; Steven Wu; Virginia Smith (**Carnegie Mellon University**)
+- **Venue:** arXiv preprint, 2025
+- **TL;DR (research gap):** Shows many prior benchmark setups are too “separable”; with realistic forget-retain overlap, existing methods degrade substantially and utility side effects become clearer.
+- **Link:** https://arxiv.org/abs/2506.15699
+
+## 11) Unlearning's Blind Spots: Over-Unlearning and Prototypical Relearning Attack
+- **Authors (Affiliation):**  
+  SeungBum Ha; Saerom Park; Sung Whan Yoon (**Ulsan National Institute of Science and Technology, UNIST**)
+- **Venue:** arXiv preprint, 2025 (updated 2026)
+- **TL;DR (research gap):** Directly formalizes blind-spot failure modes (over-unlearning and relearning attacks), supporting your claim that current protocols can miss latent post-unlearning damage.
+- **Link:** https://arxiv.org/abs/2506.01318
+
+## 12) Verifying Robust Unlearning: Probing Residual Knowledge in Unlearned Models
+- **Authors (Affiliation):**  
+  Hao Xuan; Xingyu Li (**University of Alberta**)
+- **Venue:** arXiv preprint, 2025
+- **TL;DR (research gap):** Argues that “unlearning happened” verification is insufficient; proposes probing residual knowledge leakage, again pointing to hidden side effects beyond standard utility checks.
+- **Link:** https://arxiv.org/abs/2504.14798
+
+## 13) Probing Knowledge Holes in Unlearned LLMs
+- **Authors (Affiliation):**  
+  Myeongseob Ko; Hoang Anh Just; Ming Jin; Ruoxi Jia (**Virginia Tech**); Charles Fleming (**Cisco Research**)
+- **Venue:** NeurIPS 2025 / arXiv:2511.00030
+- **TL;DR (research gap):** Shows unlearning can create broad “knowledge holes” that static benchmarks fail to detect; strongly aligned with your blind-spot corruption motivation.
+- **Link:** https://arxiv.org/abs/2511.00030
+
+## 14) Reveal and Release: Iterative LLM Unlearning with Self-generated Data
+- **Authors (Affiliation):**  
+  Linxi Xie; Xin Teng; Shichang Ke; Hongyi Wen; Shengjie Wang (**New York University Shanghai, Center for Data Science**)
+- **Venue:** Findings of EMNLP 2025 / arXiv:2509.14624
+- **TL;DR (research gap):** Uses model-generated forget data and iterative updates; relevant because it is explicitly data-centric, but differs from your proactive one-shot, pre-unlearning stabilization angle.
+- **Link:** https://arxiv.org/abs/2509.14624
+
+## 15) Unlearning That Lasts: Utility-Preserving, Robust, and Almost Irreversible Forgetting in LLMs
+- **Authors (Affiliation):**  
+  Naman Deep Singh; Maximilian Müller; Matthias Hein (**University of Tübingen & Tübingen AI Center**); Francesco Croce (**EPFL**)
+- **Venue:** arXiv preprint, 2025 (OpenReview submission track in 2025–2026 cycle)
+- **TL;DR (research gap):** Targets robust and persistent forgetting with strong utility preservation criteria; adjacent to your goal but optimization-centric rather than pre-unlearning data synthesis-centric.
+- **Link:** https://arxiv.org/abs/2509.02820
+- **Code:** https://github.com/nmndeep/JensUn-Unlearning
+
+## 16) A Comprehensive Evaluation of LLM Unlearning Robustness under Multi-Turn Interaction
+- **Authors (Affiliation):**  
+  Ruihao Pan; Suhang Wang (**Pennsylvania State University**)
+- **Venue:** arXiv preprint, 2026
+- **TL;DR (research gap):** Extends robustness evaluation into multi-turn settings, showing one-shot pass/fail evaluations can miss failure recovery or leakage over interaction trajectories.
+- **Link:** https://arxiv.org/abs/2603.00823
+
+## 17) Toward Understanding Unlearning Difficulty: A Mechanistic Perspective and Circuit-Guided Difficulty Metric
+- **Authors (Affiliation):**  
+  Jiali Cheng (**University of Massachusetts Lowell**); Ziheng Chen (**Walmart Global Tech**); Chirag Agarwal (**University of Virginia**); Hadi Amiri (**University of Massachusetts Lowell**)
+- **Venue:** arXiv preprint, 2026
+- **TL;DR (research gap):** Introduces sample-level unlearning difficulty analysis; relevant to your “algorithm-dependent behavior” premise and can support adaptive synthesis policies.
+- **Link:** https://arxiv.org/abs/2601.09624
+
+## 18) AGT^AO: Robust and Stabilized LLM Unlearning via Adversarial Gating Training with Adaptive Orthogonality
+- **Authors (Affiliation):**  
+  Pengyu Li; Lingling Zhang; Zhitao Gao; Yanrui Wu; Yuxuan Dong; Huan Liu; Bifan Wei; Jun Liu (**Xi'an Jiaotong University / MOE KLINNS Lab / Shaanxi Province Key Laboratory of Big Data Knowledge Engineering**)
+- **Venue:** arXiv preprint, 2026
+- **TL;DR (research gap):** Shows utility-preserving stabilization can benefit from geometry-aware constraints; useful adjacent evidence for your algorithm-adaptive preparation narrative.
+- **Link:** https://arxiv.org/abs/2602.01703
+- **Code:** https://github.com/TiezMind/AGT-unlearning
+
+---
+
+## Code Resources (quick access)
+
+- **Align-then-Unlearn:** https://github.com/ExplainableML/align-then-unlearn
+- **ReLearn:** https://github.com/zjunlp/unlearn
+- **SOUL:** https://github.com/OPTML-Group/SOUL
+- **TOFU benchmark:** https://github.com/locuslab/tofu
+- **WMDP benchmark:** https://github.com/centerforaisafety/wmdp
+- **MUSE benchmark:** https://github.com/jaechan-repo/muse_bench
+- **Unlearning That Lasts (JensUn):** https://github.com/nmndeep/JensUn-Unlearning
+- **AGT^AO:** https://github.com/TiezMind/AGT-unlearning
+
+---
+
+## Gap Check Against Your Proposed Direction (2024–2026 view)
+
+Dimensions:
+- **D1:** Pre-unlearning preparation stage exists  
+- **D2:** Explicit data synthesis over forget/retain (add/edit/remove)  
+- **D3:** Algorithm-adaptive strategy via parameter sensitivity/behavior  
+- **D4:** Explicit objective: prevent blind-spot corruption *before deployment*  
+- **D5:** One-shot stability emphasis (avoid iterative patch loops)
+
+| Paper | D1 | D2 | D3 | D4 | D5 | Overlap with your gap |
+|---|---|---|---|---|---|---|
+| ReLearn (2025) | Partial | Partial (augmentation) | No | No | Partial | **Partial overlap** |
+| Align-then-Unlearn (2025) | Yes (alignment pre-stage) | No | No | Partial | Partial | **Partial overlap** |
+| Data Augmentation Improves MU (2025, non-LLM) | Yes | Partial | No | No | Partial | **Partial overlap** |
+| Reveal and Release (2025) | Partial (self-generated data) | Partial | No | No | No (iterative) | **Partial overlap** |
+| SOUL / Gauss-Newton / AGT^AO | No | No | Partial (optimizer/geometry sensitivity) | No | Yes | **Adjacent** |
+| Blind Spots / BLUR / Probing Knowledge Holes / Multi-turn Eval | No | No | No | Yes (diagnose blind spots) | No | **Adjacent** |
+
+### Evidence-based conclusion
+- **Already well explored:** benchmarking and post-hoc diagnosis of unlearning failures (TOFU/WMDP/MUSE/BLUR + blind-spot and probing papers).  
+- **Partially explored:** data-centric interventions and pre-stages (ReLearn, Align-then-Unlearn, Reveal-and-Release), but usually not unified with algorithm-adaptive control and proactive blind-spot prevention in one-shot settings.  
+- **Still open (defensible claim):** a **unified proactive pre-unlearning data synthesis framework** that jointly performs forget/retain data shaping (add/edit/remove), adapts to algorithm-specific sensitivity, and targets blind-spot prevention before deployment for stable one-shot unlearning.
+
+### Suggested intro positioning sentence
+> Prior work has separately advanced unlearning benchmarks, blind-spot diagnostics, and selective data-centric/optimization-centric methods; however, a unified pre-unlearning framework that proactively synthesizes forget/retain data in an algorithm-adaptive manner to prevent blind-spot corruption before one-shot unlearning remains under-explored.
