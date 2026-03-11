@@ -154,6 +154,71 @@ Coverage rule used in this append: papers published/released in **2024–2026** 
 - **Link:** https://arxiv.org/abs/2602.01703
 - **Code:** https://github.com/TiezMind/AGT-unlearning
 
+## 2024–2026 Representation-Shift + Mechanistic-Interpretability Addendum
+
+This addendum targets papers that are especially useful for a literature review on **representation shift**, **activation-space interventions**, and **mechanistic interpretability** in LLM unlearning.  
+Note: **Item 17** above ("Toward Understanding Unlearning Difficulty: A Mechanistic Perspective and Circuit-Guided Difficulty Metric") already fits this theme; the papers below extend that line with activation steering, circuit localization, and latent-space disentanglement.
+
+## 19) Mechanistic Unlearning: Robust Knowledge Unlearning and Editing via Mechanistic Localization
+- **Authors (Affiliation):**  
+  Phillip Huang Guo; Aaquib Syed; Abhay Sheshadri; Aidan Ewart; Gintare Karolina Dziugaite
+- **Venue:** ICML 2025 (PMLR 267) / arXiv:2410.12949
+- **TL;DR (research gap):** Prior unlearning/editing localization is often based only on output effects, which can be brittle under paraphrase or relearning; this paper argues for **mechanism-level circuit localization** so edits target the actual factual-recall pathway rather than a superficial output symptom.
+- **Link:** https://arxiv.org/abs/2410.12949
+- **Code:** https://github.com/magikarp01/mechanistic-unlearning
+
+## 20) FALCON: Fine-grained Activation Manipulation by Contrastive Orthogonal Unalignment for Large Language Model
+- **Authors (Affiliation):**  
+  Jinwei Hu; Zhenglin Huang; Xiangyu Yin; Wenjie Ruan; Guangliang Cheng; Yi Dong; Xiaowei Huang (**University of Liverpool**)
+- **Venue:** NeurIPS 2025 / arXiv:2502.01472
+- **TL;DR (research gap):** Standard forget/retain objectives are too coarse when harmful and benign knowledge overlap; FALCON motivates **layer-selective activation manipulation** and orthogonal unalignment to separate target knowledge in representation space with fewer retain-set side effects.
+- **Link:** https://arxiv.org/abs/2502.01472
+- **Code:** https://github.com/CharlesJW222/FALCON
+
+## 21) LLM Unlearning via Neural Activation Redirection
+- **Authors (Affiliation):**  
+  William F. Shen; Xinchi Qiu; Meghdad Kurmanji; Alex Iacob; Lorenzo Sani; Yihong Chen; Nicola Cancedda; Nicholas D. Lane (**Meta / Facebook Research-associated release**)
+- **Venue:** NeurIPS 2025 poster / arXiv:2502.07218
+- **TL;DR (research gap):** Refusal-style unlearning can alter outputs without explicitly controlling where the underlying activations move; LUNAR frames unlearning as **representation redirection** toward "cannot answer" regions, making internal shift itself the optimization target.
+- **Link:** https://arxiv.org/abs/2502.07218
+- **Code:** https://github.com/facebookresearch/LUNAR
+
+## 22) Reliable Unlearning Harmful Information in LLMs with Metamorphosis Representation Projection
+- **Authors (Affiliation):**  
+  Chengcan Wu; Zeming Wei; Huanran Chen; Yinpeng Dong; Meng Sun
+- **Venue:** arXiv preprint, 2025
+- **TL;DR (research gap):** Many unlearning pipelines appear effective only because they suppress harmful responses at the surface level; this paper pushes a stronger **representation-projection view** aimed at irreversible hidden-state transformation and resistance to relearning attacks.
+- **Link:** https://arxiv.org/abs/2508.15449
+- **Code:** https://github.com/ChengcanWu/MRP
+
+## 23) Collapse of Irrelevant Representations (CIR) Ensures Robust and Non-Disruptive LLM Unlearning
+- **Authors (Affiliation):**  
+  Filip Sondej (**Jagiellonian University**); Yushi Yang (**University of Oxford**)
+- **Venue:** arXiv preprint, 2025
+- **TL;DR (research gap):** Existing methods often erase broad, shared features instead of the fact-specific subspace that should be forgotten; CIR argues for first collapsing **irrelevant/common representations** so the final update hits the harmful representation more selectively.
+- **Link:** https://arxiv.org/abs/2509.11816
+
+## 24) Representation-Aware Unlearning via Activation Signatures: From Suppression to Knowledge-Signature Erasure
+- **Authors (Affiliation):**  
+  Syed Naveed Mahmood; Md. Rezaur Rahman Bhuiyan; Tasfia Zaman; Jareen Tasneem Khondaker; Md. Sameer Sakib; K. M. Shadman Wadith; Nazia Tasnim; Farig Sadeque
+- **Venue:** arXiv preprint, 2026
+- **TL;DR (research gap):** Benchmark scores alone cannot tell whether a model truly forgot or merely learned to stay silent; this paper explicitly studies the **suppression-vs-erasure distinction** through activation signatures and uses internal knowledge traces as the unlearning target.
+- **Link:** https://arxiv.org/abs/2601.10566
+
+## 25) From Logits to Latents: Contrastive Representation Shaping for LLM Unlearning
+- **Authors (Affiliation):**  
+  Haoran Tang; Rajiv Khanna
+- **Venue:** arXiv preprint, 2026
+- **TL;DR (research gap):** Logit-level forget/retain losses ignore latent entanglement between what should be forgotten and what should be preserved; this paper shifts the focus to **contrastive latent-space shaping** to reduce representation overlap before it manifests as output interference.
+- **Link:** https://arxiv.org/abs/2601.22028
+
+## 26) KUDA: Knowledge Unlearning by Deviating Representation for Large Language Models
+- **Authors (Affiliation):**  
+  Ce Fang; Zhikun Zhang; Min Chen; Qing Liu; Lu Zhou; Zhe Liu; Yunjun Gao
+- **Venue:** arXiv preprint, 2026
+- **TL;DR (research gap):** Forcing random or refusal-like outputs does not necessarily break the internal association that stores target knowledge; KUDA instead performs unlearning by **deviating the representation itself**, with null-space protection for knowledge that should remain.
+- **Link:** https://arxiv.org/abs/2602.19275
+
 ---
 
 ## Code Resources (quick access)
@@ -166,6 +231,10 @@ Coverage rule used in this append: papers published/released in **2024–2026** 
 - **MUSE benchmark:** https://github.com/jaechan-repo/muse_bench
 - **Unlearning That Lasts (JensUn):** https://github.com/nmndeep/JensUn-Unlearning
 - **AGT^AO:** https://github.com/TiezMind/AGT-unlearning
+- **Mechanistic Unlearning:** https://github.com/magikarp01/mechanistic-unlearning
+- **FALCON:** https://github.com/CharlesJW222/FALCON
+- **LUNAR:** https://github.com/facebookresearch/LUNAR
+- **MRP:** https://github.com/ChengcanWu/MRP
 
 ---
 
