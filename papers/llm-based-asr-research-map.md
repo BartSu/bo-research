@@ -401,3 +401,154 @@ Seed-ASR 这一类工作真正让人看到的不是单纯 WER 数字，而是：
 - “这些优势能否在可部署的延迟和成本下成立？”
 
 这两个问题，决定了这个方向接下来会不会真正成为主流。
+
+---
+
+## 10. 针对你当前问题的补充：SLAM-ASR / LLM-based ASR / unlearning / linear projector
+
+如果把问题进一步收窄成：
+
+> **“在 LLM-based ASR，尤其是 SLAM-ASR 这类 speech encoder + LLM + projector 架构里，有没有专门把 unlearning 放在线性 projector 上做的工作？”**
+
+我目前查到的结论是：
+
+> **已经有“LLM-based ASR 做 unlearning”的直接论文；但我还没有看到公开论文明确把 unlearning 限定为“只更新 SLAM-ASR 的 linear projector”。**
+
+下面按“直接命中”与“相邻证据”分开说。
+
+### 10.1 直接命中：已经有 LLM-based ASR unlearning 论文
+
+1. **Unlearning LLM-Based Speech Recognition Models** (Interspeech 2025)  
+   <https://www.isca-archive.org/interspeech_2025/liu25b_interspeech.html>
+
+这篇是目前最直接命中的工作，因为它讨论的就是：
+
+- **autoregressive LLM-based ASR 的 unintended memorization**，
+- **RTBF / data deletion 场景下的 unlearning**，
+- 以及 **privacy-utility trade-off**。
+
+它的核心贡献是：
+
+- 先定义和测量 LLM-based ASR 的 memorization：
+  - WER-based memorization rate，
+  - homophone-based memorization rate，
+  - prompting-based memorization rate；
+- 再用 **gradient ascent** 在 forget set 上做 post-training unlearning。
+
+但需要特别注意：
+
+> **这篇并不是“SLAM-ASR 的 linear projector-only unlearning”论文。**
+
+原因是它在方法部分写得很清楚：
+
+- LLM-based ASR 由 audio encoder、text embedding、autoregressive decoder/LLM 构成；
+- unlearning 可以通过 **full fine-tuning 或 PEFT** 完成；
+- 它实验里的 base ASR 也不是“只训练一个 SLAM-ASR 线性 projector”的最简设置，而是：
+  - audio encoder 侧：**只有 adapter 可训练**，其余层冻结；
+  - LLM 侧：dense layers 用 **LoRA** 微调；
+  - speech-to-LLM 接口里包含 adapter / linear mapping，但论文没有把 unlearning 明确限制为“只改 linear projector”。
+
+所以这篇论文给你的最重要信息是：
+
+- **LLM-based ASR 的 unlearning 已经开始有人做了；**
+- 但 **parameter locus 还没有被公开文献清楚收敛到 “linear projector only”**。
+
+### 10.2 与 linear projector 最接近的正向证据：projector 确实是一个很强的轻量模块
+
+虽然我还没找到“projector-only unlearning”的直接论文，但 projector 在 LLM-based ASR 里已经被反复证明是一个非常关键、而且可单独训练的模块。
+
+最相关的两篇是：
+
+1. **An Embarrassingly Simple Approach for LLM with Strong ASR Capacity** (2024)  
+   <https://arxiv.org/abs/2402.08846>
+
+   这篇就是 SLAM-ASR 路线最典型的证据。其核心结论是：
+
+   - 冻结 speech encoder；
+   - 冻结 LLM；
+   - **只训练 linear projector**；
+   - 也能做出很强的 ASR。
+
+   这篇并不是 unlearning 论文，但它非常重要，因为它说明：
+
+   > 如果你想把 unlearning 也限制在一个极小的参数子空间里，**linear projector 是一个天然候选位点**。
+
+2. **Reducing Prompt Sensitivity in LLM-based Speech Recognition Through Learnable Projection** (2026, ICASSP 2026)  
+   <https://arxiv.org/abs/2601.20898>
+
+   这篇不是忘记训练，而是 prompt robustness，但它提供了另一条很关键的 projector 证据：
+
+   - 以 SLAM-ASR 为 base model；
+   - base model 延续“**只训练 speech projector**、encoder 和 LLM 冻结”的设定；
+   - 进一步引入 **prompt projector**；
+   - 并且在这个扩展实验里，作者强调 **冻结底层模型、只训练 projector 更稳定**。
+
+   这条证据的价值在于：
+
+   > projector 不只是“能训”，而且在 speech-LLM 接口处往往是一个 **稳定、低成本、可插拔** 的更新位置。
+
+### 10.3 目前没找到的关键点：公开论文还没有明确写出“linear projector-only unlearning”
+
+到目前为止，我还没有检索到下面这种完全正面命中的公开论文：
+
+- **SLAM-ASR / speech-LLM ASR**
+- **machine unlearning / RTBF / forget set**
+- **只更新 linear projector（不改 encoder、不改 LLM、不改 LoRA）**
+- 并给出系统实验对比
+
+也就是说，当前公开文献更像是：
+
+- 一边已经证明了 **projector-only training 在 ASR 中可行**；
+- 另一边已经证明了 **LLM-based ASR 做 unlearning 是值得研究的**；
+- 但这两条线 **还没有在“projector-only unlearning”上真正合流**。
+
+### 10.4 这意味着什么：这里很可能就是一个明确 research gap
+
+如果你想做的就是：
+
+> **在 SLAM-ASR 这种 speech encoder + frozen LLM + linear projector 架构中，只通过更新 projector 完成 targeted unlearning**
+
+那它现在看起来很像一个相当干净的空白点。
+
+一个很自然的研究问题可以被表述成：
+
+> **Can targeted unlearning in LLM-based ASR be localized to the speech-to-LLM linear projector while preserving ASR utility better than adapter/LoRA/full-model updates?**
+
+这个问题值得做的原因有三点：
+
+1. **参数效率很强**  
+   如果 projector-only 就能完成 forget 请求，成本会明显低于 adapter/LoRA/full-model 更新。
+
+2. **结构解释性更强**  
+   在 speech-LLM 架构里，projector 就是跨模态接口；把忘记约束在这个接口层，有较强的结构动机。
+
+3. **实验设计非常清楚**  
+   可以直接和下面几种方案做 apples-to-apples 对比：
+   - projector-only unlearning；
+   - adapter-only unlearning；
+   - LLM-side LoRA unlearning；
+   - joint PEFT unlearning；
+   - full-model unlearning。
+
+### 10.5 如果继续往下挖，最值得验证的 3 个子问题
+
+如果你后面准备继续沿这个点追文献或做实验，我建议重点盯下面三个子问题：
+
+1. **projector-only unlearning 到底忘掉的是什么？**  
+   是真的消除了 target content 的可恢复性，还是只是破坏了 speech-text alignment，造成表面失忆？
+
+2. **projector-only 会不会更容易保持 retain utility？**  
+   直觉上它更局部，但也可能因为 projector 是跨模态瓶颈，反而更容易牵连通用识别能力。
+
+3. **projector-only 的忘记是否更容易被 relearn？**  
+   如果 target knowledge 主要仍存于 LLM 内部，那么只改 projector 可能只是切断了当前映射，而不是做到了更持久的删除。
+
+### 10.6 当前可执行的文献判断
+
+如果现在要把结论压缩成一句话，我会写成：
+
+> **“LLM-based ASR 的 unlearning 已经有直接论文（Interspeech 2025），SLAM-ASR 的 linear projector-only training 也已经被证明可行；但我目前还没看到公开论文把两者结合成‘linear projector-only unlearning’。”**
+
+所以，针对你现在这个问题，最准确的回答不是“已经有成熟文献”，而是：
+
+> **有非常接近的两条证据链，但它们之间的那一步——‘只在线性 projector 上做 unlearning’——目前仍然像一个明显空白。**
