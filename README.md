@@ -10,3 +10,4 @@
 ## Ideas
 
 - [Non-forgettable safety-critical knowledge in LLMs](idea/non-forgettable-safety-knowledge.md)
+- [SLAM-ASR: plug-and-play audio-embedding corrupted prompts for forgetting](idea/slam-asr-audio-embedding-corrupted-prompts.md)
