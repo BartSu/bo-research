@@ -5,6 +5,7 @@
 - [LLM-based ASR: research map and "question -> paper answer" summary](papers/llm-based-asr-research-map.md)
 - [LLM unlearning: geometry-aware + data-augmentation shortlist](papers/pre-unlearning-data-augmentation-shortlist.md)
 - [LLM unlearning: research gap table + pre-unlearning data refinement framework](papers/llm-unlearning-research-gap-table.md)
+- [Forget data -> irrelevant knowledge corruption in LLM unlearning](papers/forget-data-knowledge-corruption.md)
 - [Cross-model causal mediation analysis for fine-tuning](papers/causal-mediation-analysis.md)
 
 ## Ideas
