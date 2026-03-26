@@ -10,3 +10,4 @@
 ## Ideas
 
 - [Non-forgettable safety-critical knowledge in LLMs](idea/non-forgettable-safety-knowledge.md)
+- [Plug-and-play audio embedding corruption for LLM-based ASR unlearning](idea/plug-and-play-audio-embedding-unlearning-for-llm-asr.md)
