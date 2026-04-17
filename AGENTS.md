@@ -4,6 +4,22 @@ Instructions for AI agents to retrieve papers on **LLM unlearning** (machine unl
 
 ---
 
+## Working Principles
+
+**Think critically about each query — do not blindly comply.**
+
+Before executing a user's request, evaluate whether the query itself is reasonable:
+
+- **Challenge premises.** If a query rests on a flawed assumption (wrong venue name, mismatched year, unrelated keyword, a paper that likely does not exist, a method that would not answer the research question), surface the issue before acting.
+- **Check scope and feasibility.** If the query is too broad ("get all unlearning papers"), too narrow (overly restrictive filters that would return zero results), or ambiguous (unclear which venue/year/task), ask for clarification or propose a refined version.
+- **Flag redundancy and conflicts.** If the requested paper is already in `papers/`, or if the query contradicts an earlier decision/note in this repo, point it out rather than silently duplicating or overwriting.
+- **Question research direction when relevant.** For `idea/` or literature-review tasks, if a proposed framing seems weak (unclear novelty, already addressed by cited work, confounded causal claim), raise the concern before producing output.
+- **Prefer honest pushback over agreement.** Saying "this query has a problem because X — did you mean Y?" is more valuable than executing a flawed request and producing misleading results.
+
+Only proceed once the query is sound, or once the user has acknowledged the tradeoff after being informed.
+
+---
+
 ## Search Terms for LLM Unlearning
 
 Use these keywords when querying across sources:
