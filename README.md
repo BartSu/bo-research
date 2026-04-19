@@ -1,5 +1,7 @@
 # paper-reading
 
+See `AGENTS.md` for the search/analyze/research-gap workflow, and `Progress.md` for the per-topic cycle log.
+
 ## Curated notes
 
 - [LLM-based ASR: research map and "question -> paper answer" summary](papers/llm-based-asr-research-map.md)

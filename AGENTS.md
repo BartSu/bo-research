@@ -20,6 +20,33 @@ Only proceed once the query is sound, or once the user has acknowledged the trad
 
 ---
 
+## Workflow: Search → Analyze → Research Gap
+
+This repo's purpose is **periodic literature review**: search new work, analyze it against what's already catalogued, and surface research gaps worth pursuing. Each cycle should produce a concrete update to `Progress.md`.
+
+### Loop
+
+1. **Search** — Pick one topic from `Progress.md`. Query the sources listed below (arXiv / OpenReview / ACL Anthology) using that topic's keywords. Restrict to the date range since the last entry for that topic in `Progress.md`.
+2. **Triage** — For each hit, decide: (a) already in `papers/` or `idea/` → skip; (b) clearly off-topic → skip; (c) relevant → read abstract + intro, extract the claim, method, and what it leaves unsolved.
+3. **Record** — Add relevant papers to the appropriate file in `papers/` (new file per sub-theme, or append to an existing shortlist/gap table). Keep one-paragraph summaries, not full notes.
+4. **Identify gaps** — After triage, explicitly answer: *what question is still unanswered across the papers just read?* Write this as a bullet under the topic's "Open gaps" section in `Progress.md`. If a gap turns into a concrete proposal, create a new file in `idea/`.
+5. **Update `Progress.md`** — Log the date, queries used, papers added, and new/closed gaps under the relevant topic.
+
+### File conventions
+
+- `papers/` — factual notes about external work (shortlists, gap tables, research maps). One file per sub-theme or synthesis artifact.
+- `idea/` — our own research proposals. One file per idea. Each should cite the `papers/` notes that motivate it.
+- `Progress.md` — living log of periodic search cycles, organized by topic. Source of truth for *what's been covered and when*.
+- File naming: kebab-case, descriptive (`llm-unlearning-research-gap-table.md`, not `notes1.md`).
+
+### When to create vs. extend
+
+- **New topic** → new section in `Progress.md` + (eventually) new files in `papers/`.
+- **New angle within an existing topic** → extend the existing `papers/` file; don't fragment.
+- **Idea crystallized enough to design an experiment** → new file in `idea/`.
+
+---
+
 ## Search Terms for LLM Unlearning
 
 Use these keywords when querying across sources:
