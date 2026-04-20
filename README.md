@@ -8,6 +8,8 @@ See `AGENTS.md` for the search/analyze/research-gap workflow, and `Progress.md` 
 - [LLM unlearning: geometry-aware + data-augmentation shortlist](papers/pre-unlearning-data-augmentation-shortlist.md)
 - [LLM unlearning: research gap table + pre-unlearning data refinement framework](papers/llm-unlearning-research-gap-table.md)
 - [Cross-model causal mediation analysis for fine-tuning](papers/causal-mediation-analysis.md)
+- [LLM-based ASR × unlearning: 2025-H2 / 2026-Q2 landscape](papers/llm-asr-unlearning-landscape.md)
+- [Attention sink in LLM-based ASR / speech-LLMs](papers/attention-sink-llm-asr.md)
 
 ## Ideas
 

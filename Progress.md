@@ -69,6 +69,35 @@ Ran under the LLM-based ASR topic (see that section for details). No new standal
 
 ---
 
+## Attention Sink in Speech-LLMs
+
+**Scope.** Attention-sink phenomena (first-token / BOS attention concentration) and massive activations in speech-LLMs / LLM-based ASR. Includes audio-token attention analysis, sink-targeted interventions (streaming, editing, unlearning), and audio-register-token proposals. Excludes generic text-only sink work beyond what's needed as grounding.
+
+**Keywords.** `attention sink`, `massive activations`, `register token`, `KV cache` + `speech-LLM` / `SLAM-ASR` / `SALMONN` / `Qwen2-Audio`; `visual attention sink` (for cross-modal analogy); `audio token compression`.
+
+**Artifacts.**
+- `papers/attention-sink-llm-asr.md` — foundations + speech-LLM direct/adjacent evidence + testable hypotheses + gap analysis.
+
+**Cycles.**
+
+### 2026-04-19 — first pass: does attention sink exist in LLM-based ASR?
+
+- **Window queried:** Foundations unbounded; speech-LLM evidence 2025-H2 – 2026-Q2.
+- **Sources:** arXiv, ICLR 2024/2025/2026, ICASSP 2026, GitHub (streaming-llm, Attention-Sink).
+- **Finding:** Direct evidence on pure SLAM-ASR is essentially zero. Only one切题 paper exists: **Anand et al., "Mitigating Attention Sinks and Massive Activations in AVSR with LLMs"** (arXiv:2510.22603, ICASSP 2026). It confirms sinks exist in Llama-AVSR but on `<audio>`/`</audio>` special tokens and low-semantic prompt text — *not* inside projected audio frames. Intermediate sinks emerge during multimodal fine-tuning; sink-token hidden states are near-clones of BOS.
+- **Adjacent evidence:** Visual sink literature (LLaVA-VAR, ViT-sink, Victor registers) likely transfers — projected audio frames (up to 750 tokens per 30s) should have similar sink structure, but untested.
+- **Not yet analyzed:** SLAM-ASR, SALMONN, Qwen2-Audio, Kimi-Audio sink patterns on pure-audio ASR.
+
+**Open gaps.**
+
+1. **Pure-ASR analysis paper is wide open.** Cross-model (SLAM-ASR / SALMONN / Qwen2-Audio / Kimi-Audio) sink + massive-activation atlas is a low-risk Interspeech / ICASSP-scale paper.
+2. **Length-scaling of sinks in long audio.** Does sink position drift or split as audio extends 10 → 180s? Direct implication for RoPE interpolation in long-audio ASR.
+3. **Modality-specific sink heads.** Do "audio-critical heads" (AudioKV-style) overlap with sink heads? If separable, enables speech-LLM-specific KV eviction beyond text-LLM transfer.
+4. **Sink as intervention point for unlearning / speaker erasure.** If sinks encode domain/speaker info (probing test needed), sink-activation patching becomes a lightweight intervention — **high synergy with the SLAM-ASR classifier-gated corruption idea in `idea/`**.
+5. **Audio register tokens.** Darcet/Victor-style learnable registers at the projector output to absorb intermediate sinks. Direct follow-up to Anand et al.'s decorrelation loss; almost certainly tractable.
+
+---
+
 ## Causal Mediation Analysis (methodology)
 
 **Scope.** Causal mediation / interpretability methods that can attribute fine-tuning or unlearning effects to specific components. Cross-model mediation, activation patching, circuit-level attribution. Used as a methodological toolkit for the topics above, not a standalone research area.
