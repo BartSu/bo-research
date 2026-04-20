@@ -1,18 +1,13 @@
 # paper-reading
 
-See `AGENTS.md` for the search/analyze/research-gap workflow, and `Progress.md` for the per-topic cycle log.
+**→ [研究 Idea 总览（审视入口）](idea/ideas-overview.md)**
 
-## Curated notes
+当前正在验证与推进的 3 条 idea（中文整理、优化标题、research gap、novelty 全部收在上面这份文档里）：
 
-- [LLM-based ASR: research map and "question -> paper answer" summary](papers/llm-based-asr-research-map.md)
-- [LLM unlearning: geometry-aware + data-augmentation shortlist](papers/pre-unlearning-data-augmentation-shortlist.md)
-- [LLM unlearning: research gap table + pre-unlearning data refinement framework](papers/llm-unlearning-research-gap-table.md)
-- [Cross-model causal mediation analysis for fine-tuning](papers/causal-mediation-analysis.md)
-- [LLM-based ASR × unlearning: 2025-H2 / 2026-Q2 landscape](papers/llm-asr-unlearning-landscape.md)
-- [Attention sink in LLM-based ASR / speech-LLMs](papers/attention-sink-llm-asr.md)
+1. **Audit Before Unlearn** — 遗忘数据驱动的 Pre-Unlearning 知识腐蚀审计框架
+2. **Classifier-Gated Audio Embedding Corruption** — LLM-based ASR 的 plug-and-play 说话人 / 短语级遗忘
+3. **Attention Sink in LLM-based ASR** — 跨模型图谱与干预位点
 
-## Ideas
+---
 
-- [Non-forgettable safety-critical knowledge in LLMs](idea/non-forgettable-safety-knowledge.md)
-- [SLAM-ASR: plug-and-play audio-embedding corrupted prompts for forgetting](idea/slam-asr-audio-embedding-corrupted-prompts.md)
-- [遗忘数据如何关联知识腐蚀？Pre-unlearning 腐蚀预测框架](idea/forget-data-knowledge-corruption-correlation.md)
+工作流与周期性文献综述记录见 `AGENTS.md` 与 `Progress.md`。
