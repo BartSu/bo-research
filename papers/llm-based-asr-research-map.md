@@ -120,18 +120,22 @@ Seed-ASR 这一类工作非常重要，因为它们不只关心 acoustic-to-text
 
 下面这张表是核心部分。
 
-| 研究问题 | 代表 paper | 这篇 paper 回答了什么 | 还没回答好的地方 |
-|---|---|---|---|
-| **Q1. LLM 不直接看文本训练目标，只接一个 speech encoder，真的能做强 ASR 吗？** | **An Embarrassingly Simple Approach for LLM with Strong ASR Capacity** (2024, arXiv:2402.08846) | 给出了一个很强的“简单可行性”答案：冻结 speech encoder 和 LLM，只训练一个线性 projector，也能做出竞争力很强的 LLM-based ASR。说明复杂 modal alignment 不是唯一出路。 | 证明了“能 work”，但没有彻底解决跨域鲁棒性、流式、低资源下的数据效率等问题。 |
-| **Q2. Speech encoder 和 LLM 之间到底应该怎么接，怎么训？** | **A Comprehensive Solution to Connect Speech Encoder and Large Language Model for ASR** (2024, arXiv:2406.17272) | 回答了“接口设计和训练 recipe”问题：部分微调、LoRA、matching loss、针对插入错误的训练/推理策略都有帮助。 | 仍然属于“把系统训顺”的工程解法，离统一理论或通用最优连接方式还有距离。 |
-| **Q3. LLM 放在第二阶段做 rescoring，值不值得？** | **Large-scale Language Model Rescoring on Long-form Data** (ICASSP 2023, arXiv:2306.08133) | 给出了非常实用的答案：对长语音、长视频转写，LLM rescoring 可以显著降低 WER，并对 salient terms / 关键词识别尤其有帮助。 | 主要证明了文本 LLM 对 long-form ASR 有价值，但还不是“端到端 speech-LLM”。 |
-| **Q4. 只用文本 LLM 重打分够了吗，还是 speech-text foundation model 会更好？** | **Speech Recognition Rescoring with Large Speech-Text Foundation Models** (2024, arXiv:2409.16654) | 回答是：**speech-text foundation model 的重打分能力可以超过 text-only LLM**，说明跨模态知识对 second-pass ASR 是有实际收益的。 | 仍然是两阶段体系，不能直接说明 speech-LLM 主干一定优于传统 ASR 主干。 |
-| **Q5. LLM 能不能直接参与解码，而不是只做 N-best 重排序？** | **Guiding an Automatic Speech Recognition Decoder using Large Language Models** (2025, arXiv:2508.02228) | 回答是：可以。该方向试图把 acoustic model 和 LLM 的优势分离建模，再通过迭代解码把两者结合起来，尤其对复杂句子、缩略词、领域词有效。 | 计算开销、工程复杂度、不同 AM/LLM 组合的稳定性仍然是部署问题。 |
-| **Q6. LLM-based ASR 的优势是否只是“语言更强”，还是也能利用外部上下文？** | **Seed-ASR: Understanding Diverse Speech and Contexts with LLM-based Speech Recognition** (2024, arXiv:2407.04675) | 给出了更进一步的答案：LLM-based ASR 不只是 language prior 更强，还能显式吸收对话历史、会议信息、编辑上下文等外部 context，从而提升关键词召回和场景适应性。 | 这类系统规模通常很大，训练数据和系统成本高，开源可复现性也相对弱。 |
-| **Q7. LLM-based ASR 能做实时 / 流式吗？** | **Speech ReaLLM -- Real-time Streaming Speech Recognition with Multimodal LLMs by Teaching the Flow of Time** (2024, arXiv:2406.09569) | 回答是：能，但必须重新设计训练范式，让模型学会“时间流”。这说明 decoder-only / multimodal LLM 不是天然只能做离线任务。 | 流式场景下的延迟、稳定性、工业级吞吐和长会话累积误差仍然没有完全解决。 |
-| **Q8. LLM-based ASR 能不能在 low-resource 或 code-switching 条件下优于 Whisper？** | **A Comparative Study of LLM-based ASR and Whisper in Low Resource and Code Switching Scenario** (2024, arXiv:2412.00721) | 给出了一个很重要的“非神话化”答案：在低资源场景，LLM-based ASR 可能优于 Whisper；但在 code-switching 等设置下，Whisper 仍可能更强。 | 说明优势是条件性的，不是所有场景都赢；也说明 benchmark 选择非常重要。 |
-| **Q9. 对低资源语言，LLM / LM 的文本先验到底有没有稳定帮助？** | **Whisper-LM: Improving ASR Models with Language Models for Low-Resource Languages** (2025, arXiv:2503.23542) | 回答是：有帮助，尤其在少数语种和低资源设置里，引入 LM 后能稳定改善识别；统计 LM 和 LLM 都有价值，只是收益形态不同。 | 这篇更偏“Whisper + LM”，说明语言模型增强有效，但不完全等于 speech-LLM 主干路线的胜利。 |
-| **Q10. Speech-LLM 会不会天然优于强大的端到端 ASR？** | **Bridging the gap: A comparative exploration of Speech-LLM and end-to-end architecture for multilingual conversational ASR** (2026, arXiv:2601.01461) | 当前答案偏保守：**未必**。在多语言对话式 ASR 上，speech-LLM 有潜力，但精调后的强 E2E Whisper 仍可能更强。 | 这是一个重要提醒：Speech-LLM 目前更像“新范式探索 + 场景化优势”，而不是已经全面替代传统强基线。 |
+| 研究问题 | 代表 paper | 这篇 paper 回答了什么 | 还没回答好的地方 | 开源代码 |
+|---|---|---|---|---|
+| **Q1. LLM 不直接看文本训练目标，只接一个 speech encoder，真的能做强 ASR 吗？** | **An Embarrassingly Simple Approach for LLM with Strong ASR Capacity** (2024, arXiv:2402.08846) | 给出了一个很强的“简单可行性”答案：冻结 speech encoder 和 LLM，只训练一个线性 projector，也能做出竞争力很强的 LLM-based ASR。说明复杂 modal alignment 不是唯一出路。 | 证明了“能 work”，但没有彻底解决跨域鲁棒性、流式、低资源下的数据效率等问题。 | ✅ [X-LANCE/SLAM-LLM](https://github.com/X-LANCE/SLAM-LLM) |
+| **Q2. Speech encoder 和 LLM 之间到底应该怎么接，怎么训？** | **A Comprehensive Solution to Connect Speech Encoder and Large Language Model for ASR** (2024, arXiv:2406.17272) | 回答了“接口设计和训练 recipe”问题：部分微调、LoRA、matching loss、针对插入错误的训练/推理策略都有帮助。 | 仍然属于“把系统训顺”的工程解法，离统一理论或通用最优连接方式还有距离。 | ❌ 未公开 |
+| **Q3. LLM 放在第二阶段做 rescoring，值不值得？** | **Large-scale Language Model Rescoring on Long-form Data** (ICASSP 2023, arXiv:2306.08133) | 给出了非常实用的答案：对长语音、长视频转写，LLM rescoring 可以显著降低 WER，并对 salient terms / 关键词识别尤其有帮助。 | 主要证明了文本 LLM 对 long-form ASR 有价值，但还不是“端到端 speech-LLM”。 | ❌ 未公开（Google） |
+| **Q4. 只用文本 LLM 重打分够了吗，还是 speech-text foundation model 会更好？** | **Speech Recognition Rescoring with Large Speech-Text Foundation Models** (2024, arXiv:2409.16654) | 回答是：**speech-text foundation model 的重打分能力可以超过 text-only LLM**，说明跨模态知识对 second-pass ASR 是有实际收益的。 | 仍然是两阶段体系，不能直接说明 speech-LLM 主干一定优于传统 ASR 主干。 | ❌ 未公开（Amazon） |
+| **Q5. LLM 能不能直接参与解码，而不是只做 N-best 重排序？** | **Guiding an Automatic Speech Recognition Decoder using Large Language Models** (2025, arXiv:2508.02228) | 回答是：可以。该方向试图把 acoustic model 和 LLM 的优势分离建模，再通过迭代解码把两者结合起来，尤其对复杂句子、缩略词、领域词有效。 | 计算开销、工程复杂度、不同 AM/LLM 组合的稳定性仍然是部署问题。 | ❌ 未公开 |
+| **Q6. LLM-based ASR 的优势是否只是“语言更强”，还是也能利用外部上下文？** | **Seed-ASR: Understanding Diverse Speech and Contexts with LLM-based Speech Recognition** (2024, arXiv:2407.04675) | 给出了更进一步的答案：LLM-based ASR 不只是 language prior 更强，还能显式吸收对话历史、会议信息、编辑上下文等外部 context，从而提升关键词召回和场景适应性。 | 这类系统规模通常很大，训练数据和系统成本高，开源可复现性也相对弱。 | ❌ 闭源（ByteDance 内部系统） |
+| **Q7. LLM-based ASR 能做实时 / 流式吗？** | **Speech ReaLLM -- Real-time Streaming Speech Recognition with Multimodal LLMs by Teaching the Flow of Time** (2024, arXiv:2406.09569) | 回答是：能，但必须重新设计训练范式，让模型学会“时间流”。这说明 decoder-only / multimodal LLM 不是天然只能做离线任务。 | 流式场景下的延迟、稳定性、工业级吞吐和长会话累积误差仍然没有完全解决。 | ❌ 未公开（Meta） |
+| **Q8. LLM-based ASR 能不能在 low-resource 或 code-switching 条件下优于 Whisper？** | **A Comparative Study of LLM-based ASR and Whisper in Low Resource and Code Switching Scenario** (2024, arXiv:2412.00721) | 给出了一个很重要的“非神话化”答案：在低资源场景，LLM-based ASR 可能优于 Whisper；但在 code-switching 等设置下，Whisper 仍可能更强。 | 说明优势是条件性的，不是所有场景都赢；也说明 benchmark 选择非常重要。 | ⚠️ 论文已撤回，无代码 |
+| **Q9. 对低资源语言，LLM / LM 的文本先验到底有没有稳定帮助？** | **Whisper-LM: Improving ASR Models with Language Models for Low-Resource Languages** (2025, arXiv:2503.23542) | 回答是：有帮助，尤其在少数语种和低资源设置里，引入 LM 后能稳定改善识别；统计 LM 和 LLM 都有价值，只是收益形态不同。 | 这篇更偏“Whisper + LM”，说明语言模型增强有效，但不完全等于 speech-LLM 主干路线的胜利。 | ✅ [hitz-zentroa/whisper-lm](https://github.com/hitz-zentroa/whisper-lm) |
+| **Q10. Speech-LLM 会不会天然优于强大的端到端 ASR？** | **Bridging the gap: A comparative exploration of Speech-LLM and end-to-end architecture for multilingual conversational ASR** (2026, arXiv:2601.01461) | 当前答案偏保守：**未必**。在多语言对话式 ASR 上，speech-LLM 有潜力，但精调后的强 E2E Whisper 仍可能更强。 | 这是一个重要提醒：Speech-LLM 目前更像“新范式探索 + 场景化优势”，而不是已经全面替代传统强基线。 | ✅ [1535176727/MLC-SLM](https://github.com/1535176727/MLC-SLM) |
+
+> **关于 open-source 命中率的快速观察**：在上面 10 篇代表性 paper 里，只有 4 篇真正给出了可用代码（SLAM-ASR、Whisper-LM、MLC-SLM、加上 Q5 的部分推理资源）。**这说明 LLM-based ASR 的"顶会代表作"很多其实并不开源**——尤其 rescoring 路线（Google/Amazon）和大规模 context-aware 系统（Seed-ASR、Speech ReaLLM）几乎全部闭源。
+>
+> 完整的"哪些 LLM-based ASR 真的开源、能跑、可以复现"清单已经独立成文：[**llm-based-asr-open-source.md**](llm-based-asr-open-source.md)，按 ASR-first speech-LLM / GER 后纠错 / open omni 模型 / 多语言 / AVSR / speaker-aware 等方向分类，含 30+ 项目仓库链接。
 
 ---
 
