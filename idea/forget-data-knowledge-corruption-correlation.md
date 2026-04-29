@@ -287,6 +287,228 @@ Phase 3: 预测导向的干预
 
 ---
 
+## 第三·五部分：评估框架详细设计
+
+参考论文（[1]）的成功在于其严谨的实验评估设计：interpolation/extrapolation 两种评估场景、5 个评估指标、3 个回归器对比、跨模型迁移、统计随机性检验。我们需要建立同等甚至更完善的评估体系来验证"遗忘数据特征可以预测知识腐蚀"这一核心命题。
+
+### 1. 数据准备协议（类比 Algorithm 1）
+
+参考论文的核心技巧是：每个"训练样本"不是一个文本，而是一个**子数据集**。类比地，我们的每个训练样本是一个 **(遗忘子集, 保留子集, 测试集)** 三元组。
+
+```
+Algorithm: Unlearning Data Preparation
+
+Input:
+  M_base   — 预训练模型 (e.g., Llama-3-8B)
+  D_full   — 完整知识语料 (e.g., TOFU full corpus)
+  K        — 测试集大小
+  N        — 总采样数
+
+Output:
+  Q = {(F_i, R_i, T_i, method_i, corruption_i)} — 训练/验证/测试三元组
+
+1: 固定测试集 T ← 从 D_full 中采样 K 个样本（覆盖多个知识领域）
+2: for i in [1..N] do
+3:   随机选择遗忘集大小 |F_i| ∈ {50, 100, 200, 500}
+4:   随机选择遗忘集属性 (主题、实体密度、embedding 重叠度等)
+5:   从 D_full 中采样 F_i 满足目标属性, 且 F_i ∩ T = ∅
+6:   R_i ← D_full \ F_i \ T
+7:   对 F_i 提取 18+ 个特征 → feature_vector_i
+8:   随机选择 unlearning 方法 method_i ∈ {GA, NPO, RMU, ...}
+9:   执行 unlearning: M_unlearned ← method_i(M_base, F_i, R_i)
+10:  在 T 和通用 benchmark 上测量腐蚀 → corruption_i
+11:  Q ← Q ∪ (feature_vector_i, method_i, corruption_i)
+12: end for
+13: return Q
+```
+
+**关键设计选择**：
+- **遗忘集属性需要受控变化**：不能随机采样遗忘集，否则特征空间可能退化。需要系统地变化 embedding 重叠度（低/中/高）、知识连通度（稀疏/密集）、主题多样性（单一/多元）等。
+- **每个遗忘集需在多个 unlearning 方法上运行**：同一个特征向量对应不同方法的不同腐蚀值，既增加训练数据量，也支持后续迁移性分析。
+- **采样数 N 的估计**：参考论文采样 500 个数据点。考虑到我们的特征维度更高（18+ vs. 13），且需要覆盖多种方法，建议 N ≥ 300 per model per method，总计约 300 × 3 models × 4 methods = 3600 个数据点。
+
+### 2. 评估预测器的指标体系
+
+#### 2.1 预测准确度指标（类比参考论文 Table 1）
+
+| 指标 | 公式 | 意义 | 参考论文对标 |
+|---|---|---|---|
+| RMSE | √(mean((ŷ - y)²)) | 整体预测误差 | 参考论文 BERT: 0.055 inter / 0.063 extra |
+| R² | 1 - SS_res / SS_tot | 可解释方差比例 | 参考论文 BERT: 0.904 inter / 0.885 extra |
+| MAE | mean(\|ŷ - y\|) | 平均绝对误差 | 参考论文 BERT: 0.037 inter / 0.045 extra |
+| MAPE | mean(\|ŷ - y\| / y) | 相对误差 | 参考论文 BERT: 0.071 inter / 0.102 extra |
+| EVS | 1 - Var(y - ŷ) / Var(y) | 可解释方差得分 | 参考论文 BERT: 0.907 inter / 0.908 extra |
+| Spearman ρ | rank correlation | 排序保持能力（新增） | 参考论文未用，但对我们更重要 |
+| Kendall τ | concordance measure | 排序一致性（新增） | 同上 |
+
+**为什么增加 Spearman ρ 和 Kendall τ？**
+在实际使用中，用户关心的不仅是预测的绝对准确度，更关心**能否正确排序**——即"遗忘集 A 比遗忘集 B 造成更大腐蚀"的判断是否正确。这对于从多个候选遗忘集中选择风险最低的方案至关重要。
+
+#### 2.2 两种评估场景（类比 interpolation/extrapolation）
+
+| 场景 | 定义 | 类比参考论文 | 实际意义 |
+|---|---|---|---|
+| **In-distribution (Interpolation)** | 训练集和测试集的遗忘数据来自相同的知识领域/benchmark | 参考论文: 同一数据集的不同子集 | 基础验证预测器的有效性 |
+| **Out-of-distribution (Extrapolation)** | 训练在 TOFU 上，测试在 WMDP 上（或反之） | 参考论文: 在情感分类上训练，在 Q&A 上测试 | 验证框架的通用性 |
+| **Cross-method (新增)** | 在 GA+NPO 上训练，在 RMU+LUNAR 上测试 | 参考论文无直接类比 | 验证特征是否方法无关 |
+| **Cross-model (新增)** | 在 Llama-3 上训练，在 Mistral 上测试 | 参考论文 Table 2: BERT→DistilBERT | 验证框架的模型通用性 |
+
+#### 2.3 评估协议详细设计
+
+**Interpolation 评估**：
+- 参考论文使用 k=200 的 overlapped k-fold cross-validation
+- 我们同样采用 k-fold CV (k=100–200)，80:20 划分
+- 报告 mean ± std 以检验统计稳定性
+
+**Extrapolation 评估**：
+- **按 benchmark 划分**：训练在 TOFU 子集上，测试在 WMDP 子集上
+- **按知识领域划分**：训练在"文学/历史"类遗忘上，测试在"科学/技术"类遗忘上
+- **按遗忘集大小划分**：训练在小遗忘集 (|F|≤100) 上，测试在大遗忘集 (|F|≥500) 上
+
+### 3. 基线对比
+
+#### 3.1 预测器基线
+
+| 基线 | 描述 | 目的 |
+|---|---|---|
+| **Random baseline** | 随机预测腐蚀值（均匀分布于观测范围内） | 下界 |
+| **Mean baseline** | 总是预测训练集中腐蚀的均值 | 无信息预测的参照 |
+| **Size-only baseline** | 仅使用遗忘集大小 \|F\| 预测腐蚀 | 测试"腐蚀是否仅由数据量决定" |
+| **CUD-adapted baseline** | 将 CUD [16] 的样本级 unlearning 难度分数聚合为集合级特征 | 测试现有 pre-unlearning 信号的腐蚀预测能力 |
+| **Proxy unlearning baseline** | 仅使用少量梯度更新（1–5步）后的保留性能下降作为预测信号 | 测试快速 probing 是否已足够 |
+
+#### 3.2 完整 unlearning + evaluation 基线（效率对比）
+
+| 方法 | 流程 | 运行时间（估计） |
+|---|---|---|
+| **传统评估** | 对每个候选遗忘集执行完整 unlearning + 全面 benchmark 评估 | ~2-6 小时 / (模型, 遗忘集, 方法) |
+| **我们的方法** | 特征提取 (几分钟) + 预测 (毫秒) | ~5-15 分钟 / 遗忘集 |
+| **加速比目标** | ≥ 10x | 对比参考论文 30x–193x |
+
+### 4. 特征消融实验设计
+
+类比参考论文用 Permutation Feature Importance 和 Accumulated Local Effects 分析特征重要性，我们设计以下消融实验：
+
+#### 4.1 按特征类别消融
+
+| 实验 | 使用的特征类别 | 验证什么 |
+|---|---|---|
+| Full | 全部 5 类 18+ 特征 | 上界 |
+| w/o Embedding | 去掉 A 类 embedding 分布特征 | H2: embedding 重叠是否是最强预测因子 |
+| w/o KG | 去掉 B 类知识图谱特征 | H6: KG 连通度是否预测腐蚀范围 |
+| w/o Circuit | 去掉 C 类 circuit 特征 | circuit 信号的增量贡献 |
+| w/o Probing | 去掉 D 类行为探测特征 | H5: 轻量级 probing 的增量价值 |
+| w/o Token | 去掉 E 类 token 统计特征 | 表层统计是否有独立预测力 |
+| Embedding only | 仅用 A 类 | 最简特征集的预测能力下界 |
+| Embedding + Probing | 仅用 A + D 类 | 最佳成本-效果权衡点 |
+
+#### 4.2 SHAP 值分析
+
+参考论文的 Finding 2 和 Finding 3 用 Permutation Feature Importance 和 ALE 发现了 CHI、FR、# unique tokens 等最具影响力的特征。我们需要同样的分析：
+
+1. **全局 SHAP** → 排出全部 18+ 特征的重要性排名
+2. **局部 SHAP** → 在高腐蚀 vs. 低腐蚀样本上的特征贡献差异
+3. **SHAP dependence plots** → 每个关键特征值与腐蚀预测之间的非线性关系（对应参考论文 Fig. 6）
+4. **SHAP interaction** → 特征间的交互效应（如 embedding 重叠度 × 遗忘集大小）
+
+#### 4.3 特征计算成本 vs. 预测提升的 Pareto 分析
+
+| 特征类别 | 计算成本 | 预测提升 (ΔR²) | 是否纳入轻量版 |
+|---|---|---|---|
+| E. Token 统计 | ~秒级 | 待测 | 一定纳入 |
+| A. Embedding 分布 | ~分钟级 (需要编码所有样本) | 预期高 | 一定纳入 |
+| B. KG 关系 | ~分钟级 (需要实体抽取 + 图查询) | 预期中 | 可选 |
+| D. 行为探测 | ~10 分钟级 (需要梯度计算) | 预期中-高 | 成本-效果平衡点 |
+| C. Circuit | ~小时级 (需要 causal tracing) | 预期中 | 仅研究用，不纳入实用版 |
+
+这种分析直接回应 Sub-Gap 5（成本收益框架），产出两个版本的预测器：
+- **Lite 版**：仅用 A + E 类特征，几分钟内完成
+- **Full 版**：全部 5 类特征，~1 小时完成，但预测更准确
+
+### 5. 预测导向干预的评估
+
+当预测器判断某遗忘集的腐蚀风险高于阈值 τ 时，触发数据干预。评估这一机制需要以下对照实验：
+
+| 组别 | 流程 | 测量 |
+|---|---|---|
+| **Blind unlearning** | 直接对原始遗忘集执行 unlearning | 腐蚀值 C_blind |
+| **Oracle-guided** | 先执行完整 unlearning + evaluation，根据结果调整后重做 | 腐蚀值 C_oracle（理论最优但极贵） |
+| **Prediction-guided** | 用预测器评估 → 高风险集触发干预 → 再执行 unlearning | 腐蚀值 C_pred + 总计算成本 |
+| **Random intervention** | 随机对部分遗忘集执行干预 | 腐蚀值 C_random（干预有效性的基线） |
+
+成功标准：
+- C_pred 显著低于 C_blind（干预有效）
+- C_pred 接近 C_oracle（预测准确到足以指导干预）
+- Prediction-guided 的总计算成本远低于 Oracle-guided
+
+### 6. 统计显著性与鲁棒性检验
+
+类比参考论文证明"Robust to statistical randomness"（mean±std 方差仅 0.00–0.03）：
+
+- **多次随机种子实验**：每个配置重复 5 次，报告 mean ± std
+- **Bootstrap confidence intervals**：对 R² 和 MAE 报告 95% CI
+- **Paired t-test / Wilcoxon test**：在消融实验中检验特征集之间的差异是否显著
+- **Cross-validation 稳定性**：报告不同 fold 之间的结果方差
+
+### 7. 预期结果表格模板
+
+类比参考论文 Table 1 的格式，预期结果表格如下：
+
+```
+Table: Knowledge Corruption Prediction Results (Random Forest)
+
+                     INTERPOLATION              EXTRAPOLATION
+                     (same benchmark)            (cross benchmark)
+METRIC         Llama-3-8B    Mistral-7B    Llama-3-8B    Mistral-7B
+─────────────────────────────────────────────────────────────────────
+RMSE  ↓        ??.??? ± ?    ??.??? ± ?    ??.??? ± ?    ??.??? ± ?
+R²    ↑        ??.??? ± ?    ??.??? ± ?    ??.??? ± ?    ??.??? ± ?
+MAE   ↓        ??.??? ± ?    ??.??? ± ?    ??.??? ± ?    ??.??? ± ?
+Spearman ρ ↑   ??.??? ± ?    ??.??? ± ?    ??.??? ± ?    ??.??? ± ?
+─────────────────────────────────────────────────────────────────────
+
+Table: Cross-Method Transferability
+
+Train Methods → Test Method    RMSE    R²      MAE     Spearman ρ
+────────────────────────────────────────────────────────────────────
+{GA, NPO, RMU} → LUNAR         ?       ?       ?       ?
+{GA, NPO, LUNAR} → RMU         ?       ?       ?       ?
+{GA, RMU, LUNAR} → NPO         ?       ?       ?       ?
+{NPO, RMU, LUNAR} → GA         ?       ?       ?       ?
+────────────────────────────────────────────────────────────────────
+
+Table: Feature Ablation Results (Llama-3-8B, Interpolation)
+
+Feature Set                R²      MAE     Spearman ρ
+──────────────────────────────────────────────────────
+Full (A+B+C+D+E)           ?       ?       ?
+w/o Embedding (A)           ?       ?       ?
+w/o KG (B)                  ?       ?       ?
+w/o Circuit (C)             ?       ?       ?
+w/o Probing (D)             ?       ?       ?
+w/o Token (E)               ?       ?       ?
+Embedding only              ?       ?       ?
+Embedding + Probing         ?       ?       ?
+Size-only baseline          ?       ?       ?
+Mean baseline               ?       ?       ?
+──────────────────────────────────────────────────────
+```
+
+### 8. 与参考论文的映射关系总结
+
+| 参考论文 [1] 的评估维度 | 我们的对应评估维度 |
+|---|---|
+| Finding 1: Fine-tuning data ↔ model robustness correlation | **Finding 1**: Forget data ↔ knowledge corruption correlation |
+| Finding 2: Most influential features (CHI, FR, # unique tokens) | **Finding 2**: Most influential features (embedding overlap, KG connectivity, ...) |
+| Finding 3: Feature-ASR correlation patterns (Fig. 6) | **Finding 3**: Feature-corruption correlation patterns (SHAP dependence plots) |
+| Runtime comparison: 30x–193x speedup (Fig. 7) | **Runtime comparison**: prediction vs. full unlearning + evaluation |
+| Transferability: cross-model (Table 2) | **Transferability**: cross-model + cross-method (new dimension) |
+| Adversarial training support (Fig. 8) | **Multi-method support**: predict corruption under different unlearning methods |
+| Statistical robustness (std in Table 1) | **Statistical robustness**: mean ± std + bootstrap CI |
+| Error analysis (logistic regression on error-inducing features) | **Error analysis**: which feature regimes cause prediction failures |
+
+---
+
 ## 第四部分：定位与新颖性
 
 ### 最强新颖性声明
